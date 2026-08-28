@@ -130,9 +130,9 @@ exports.profile = async (req, res) => {
 
 exports.createBook = async (req, res) => {
     try {
-        const { nomi, muallif, sahifasi, Janr, sotuvdaBor } = req.body
+        const { nomi, muallif, sahifasi, Janr, sotuvdaBor, egasi, email, password } = req.body
 
-        if (!nomi || !muallif || !sahifasi || !Janr || !sotuvdaBor) {
+        if (!nomi || !muallif || !sahifasi || !Janr) {
             return res.status(400).json({
                 message: "Barcha ma'lumotlar toldirilishi shart"
             })
@@ -149,12 +149,13 @@ exports.createBook = async (req, res) => {
             muallif,
             sahifasi,
             Janr,
-            sotuvdaBor
+            sotuvdaBor,
+            egasi,
+            email,
+            password
         })
 
-        return res.status(201).json({
-            message: "Book qo'shildi"
-        })
+        return res.status(201).json(book)
     } catch (error) {
         return res.status(500).json({
             message: error.message

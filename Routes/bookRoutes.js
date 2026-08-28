@@ -9,7 +9,7 @@ router.post("/books/register", bookController.registerBook)
 
 router.get("/books/stats", roleMiddleware("admin"), bookController.countBook)
 
-router.post("/books/create", roleMiddleware("superAdmin"), bookController.createBook)
+router.post("/books", bookController.createBook)
 
 router.put("/books/:id", bookController.editBook)
 
