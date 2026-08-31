@@ -7,7 +7,7 @@ router.get("/books", bookController.getBooks)
 
 router.get("/books/stats", authMiddLeware, roleMiddleware("admin"), bookController.countBook)
 
-router.post("/books", authMiddLeware, bookController.createBook)
+router.post("/books", bookController.createBook)
 
 router.put("/books/:id", bookController.editBook)
 
