@@ -67,7 +67,7 @@ exports.createBook = async (req, res) => {
             })
         }
 
-        const { nomi, muallifi, sahifasi, Janr, sotuvdaBor } = req.body
+        const { nomi, muallifi, sahifasi, Janr, sotuvdaBor, user } = req.body
 
         const book = await Book.create({
             nomi,
@@ -75,7 +75,7 @@ exports.createBook = async (req, res) => {
             sahifasi,
             Janr,
             sotuvdaBor,
-            user: req.user._id
+            user
         })
 
         return res.status(201).json(book)
