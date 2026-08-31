@@ -4,8 +4,7 @@ const genereteToken = (data) => {
     return jwt.sign({
         id: data._id,
         role: data.role,
-        ism: data.ism,
-        nom: data.nom
+        ism: data.ism
     },
         process.env.JWT_SECRET,
         { expiresIn: "1d" }

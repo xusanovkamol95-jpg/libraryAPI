@@ -4,6 +4,8 @@ const { registerSchema, loginSchema } = require("../validators/userValidator")
 const transporter = require("../config/mail")
 const genereteToken = require("../utils/genereteToken")
 
+const otpStore = {}
+
 exports.getUsers = async (req, res) => {
     try {
         const users = await User.find().select("-password")
@@ -137,7 +139,7 @@ exports.createUsers = async (req, res) => {
         const userResponse = user.toObject();
         delete userResponse.password;
 
-        rres.status(201).json({ message: "User qo'shildi!" })
+        res.status(201).json({ message: "User qo'shildi!" })
 
     } catch (error) {
         res.status(500).json({
@@ -190,9 +192,6 @@ exports.sendOTP = async (req, res) => {
         }
 
         const otp = Math.floor(100000 + Math.random() * 900000)
-
-        const otpStore = {}
-
         otpStore[email] = otp
 
         await transporter.sendMail({
@@ -203,8 +202,7 @@ exports.sendOTP = async (req, res) => {
         })
 
         res.status(200).json({
-            message: "OTP jonatildi",
-            otp
+            message: "OTP jonatildi"
         })
 
 

@@ -5,11 +5,9 @@ const { authMiddLeware } = require("../middlewares/authMiddleware")
 const { roleMiddleware } = require("../middlewares/roleMiddleware")
 router.get("/books", bookController.getBooks)
 
-router.post("/books/register", bookController.registerBook)
+router.get("/books/stats", authMiddLeware, roleMiddleware("admin"), bookController.countBook)
 
-router.get("/books/stats", roleMiddleware("admin"), bookController.countBook)
-
-router.post("/books", bookController.createBook)
+router.post("/books", authMiddLeware, bookController.createBook)
 
 router.put("/books/:id", bookController.editBook)
 
@@ -18,8 +16,6 @@ router.delete("/books/:id", bookController.deleteBook)
 router.post("/books/send", bookController.sendBook)
 
 router.post("/books/verify-otp", bookController.verifyBookOTP)
-
-router.post("/books/login" , bookController.loginBook)
 
 router.get("/books/profile", authMiddLeware, bookController.profile)
 

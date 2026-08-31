@@ -1,7 +1,6 @@
 const Book = require("../models/Book")
 const bcrypt = require("bcrypt")
 const { registerSchema } = require("../validators/bookValidator")
-const { loginSchema } = require("../validators/bookValidator")
 const transporter = require("../config/mail")
 const genereteToken = require("../utils/genereteToken")
 
@@ -51,76 +50,6 @@ exports.getBookById = async (req, res) => {
     }
 }
 
-exports.registerBook = async (req, res) => {
-    try {
-        const validation = registerSchema.safeParse(req.body)
-
-        if (!validation.success) {
-            return res.status(400).json({
-                message: validation.error.issues.map(issue => issue.message)
-            })
-        }
-
-        const { nom, sahifasi, muallif, Janr, sotuvdaBor, email, password } = req.body
-
-        const hashedPassword = await bcrypt.hash(password, 10)
-
-        const book = await Book.create({
-            nom, sahifasi, muallif, Janr, sotuvdaBor, email, password: hashedPassword
-        })
-
-        res.status(201).json({ message: "Book qo'shildi" })
-
-    } catch (error) {
-        res.status(500).json({
-            message: error.message
-        })
-    }
-}
-
-exports.loginBook = async (req, res) => {
-    try {
-        const validation = loginSchema.safeParse(req.body)
-
-        if (!validation.success) {
-            return res.status(400).json({
-                message: "To'gri kiriting!"
-            })
-        }
-
-        const { email, password } = req.body
-
-        const user = await Book.findOne({ email })
-
-        if (!user) {
-            return res.status(400).json({
-                message: "Bunday user mavjud emas!"
-            })
-        }
-
-        const isMatch = await bcrypt.compare(password, user.password)
-
-        if (!isMatch) {
-            return res.status(400).json({
-                message: "Parol xato!"
-            })
-        }
-
-        const token = genereteToken(user)
-
-        return res.status(200).json({
-            message: "Login qilindi!",
-            token
-        })
-
-    } catch (error) {
-        res.status(500).json({
-            message: error.message
-        })
-    }
-
-}
-
 exports.profile = async (req, res) => {
     res.status(200).json({
         message: "Protected profile",
@@ -130,36 +59,28 @@ exports.profile = async (req, res) => {
 
 exports.createBook = async (req, res) => {
     try {
-        const { nomi, muallif, sahifasi, Janr, sotuvdaBor, egasi, email, password } = req.body
+        const validation = registerSchema.safeParse(req.body)
 
-        if (!nomi || !muallif || !sahifasi || !Janr) {
+        if (!validation.success) {
             return res.status(400).json({
-                message: "Barcha ma'lumotlar toldirilishi shart"
+                message: validation.error.issues.map(issue => issue.message)
             })
         }
 
-        if (sahifasi <= 0) {
-            return res.status(400).json({
-                message: "Sahifa 0 dan katta bolishi shart"
-            })
-        }
+        const { nomi, muallifi, sahifasi, Janr, sotuvdaBor } = req.body
 
         const book = await Book.create({
             nomi,
-            muallif,
+            muallifi,
             sahifasi,
             Janr,
             sotuvdaBor,
-            egasi,
-            email,
-            password
+            user: req.user._id
         })
 
         return res.status(201).json(book)
     } catch (error) {
-        return res.status(500).json({
-            message: error.message
-        })
+        return res.status(500).json({ message: error.message })
     }
 }
 
@@ -176,7 +97,7 @@ exports.deleteBook = async (req, res) => {
 exports.countBook = async (req, res) => {
     try {
         const result = await Book.aggregate([
-            { $match: { muallif: "Abdullar Oripov" } },
+            { $match: { muallifi: "Abdullar Oripov" } },
             { $count: "totalBooks" }
         ])
         res.status(200).json(result)
@@ -184,6 +105,8 @@ exports.countBook = async (req, res) => {
         res.status(500).json({ message: error.message })
     }
 }
+
+const otpStore = {}
 
 exports.sendBook = async (req, res) => {
     try {
@@ -196,8 +119,6 @@ exports.sendBook = async (req, res) => {
         }
 
         const otp = Math.floor(100000 + Math.random() * 900000)
-
-        const otpStore = {}
 
         otpStore[email] = otp
 
